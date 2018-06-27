@@ -1,0 +1,27 @@
+{% macro render_waiting_list(waiting_list) -%}
+    <div class="panel panel-default">
+        <div class="panel-heading">Waiting List ({{ waiting_list|length }})</div>
+        <div class="panel-content">
+            {% if waiting_list %}
+                <table class="table table-striped">
+                    <tr>
+                        <th>Player Name</th>
+                        <th>Skating</th>
+                        <th>Shooting</th>
+                        <th>Checking</th>
+                    </tr>
+                    {% for player in waiting_list %}
+                        <tr>
+                            <td>{{ player.first_name }} {{ player.last_name }}</td>
+                            <td>{{ player.skating|int }}</td>
+                            <td>{{ player.shooting|int }}</td>
+                            <td>{{ player.checking|int }}</td>
+                        </tr>
+                    {% endfor %}
+                </table>
+            {% else %}
+                <p>There are no players on the waiting list</p>
+            {% endif %}
+        </div>
+    </div>
+{%- endmacro %}

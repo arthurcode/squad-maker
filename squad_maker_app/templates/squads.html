@@ -1,0 +1,73 @@
+{% extends 'base.html' %}
+{% from 'waiting_list.html' import render_waiting_list %}
+
+{% block title %}Squads{% endblock %}
+
+{% block header %}<h1>Squad Maker</h1>{% endblock %}
+
+{% block summary %}
+    {% if squads %}
+        {% set players_per_squad = squads[0].players|length %}
+    {% else %}
+        {% set players_per_squad = 0 %}
+    {% endif %}
+    {% set players_on_wait_list = waiting_list|length %}
+    <p class="text-center summary">
+        Made <strong>{{ squads|length }}</strong> squads of <strong>{{ players_per_squad }}</strong>
+        player{% if players_per_squad != 1 %}s{% endif %},
+        with <strong>{{ waiting_list|length }}</strong> player{% if players_on_wait_list != 1 %}s{% endif %} on
+        the waiting list.
+    </p>
+{% endblock %}
+
+{% block content %}
+    <div class="col-xs-12">
+        <form class="reset" action="{{ url_for('home') }}">
+            <button type="submit" class="btn btn-primary btn-lg btn-block">Reset</button>
+        </form>
+    </div>
+    <div class="col-xs-12">
+        <ul class="nav nav-tabs">
+            <li class="active"><a data-toggle="tab" href="#squads">Squads</a></li>
+            <li><a data-toggle="tab" href="#waiting-list">Waiting List</a></li>
+        </ul>
+
+
+        <div class="tab-content">
+            <div id="squads" class="tab-pane fade in active">
+                {% for squad in squads %}
+                    <div class="panel panel-default squad">
+                        <div class="panel-heading">Squad #{{ loop.index }}</div>
+                        <div class="panel-content">
+                            <table class="table table-striped">
+                                <tr>
+                                    <th>Player Name</th>
+                                    <th>Skating</th>
+                                    <th>Shooting</th>
+                                    <th>Checking</th>
+                                </tr>
+                                {% for player in squad.players %}
+                                    <tr>
+                                        <td>{{ player.first_name }} {{ player.last_name }}</td>
+                                        <td>{{ player.skating|int }}</td>
+                                        <td>{{ player.shooting|int }}</td>
+                                        <td>{{ player.checking|int }}</td>
+                                    </tr>
+                                {% endfor %}
+                                <tr class="average">
+                                    <td>Average</td>
+                                    <td>{{ squad.skating_average|int }}</td>
+                                    <td>{{ squad.shooting_average|int }}</td>
+                                    <td>{{ squad.checking_average|int }}</td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+            <div id="waiting-list" class="tab-pane fade">
+                {{ render_waiting_list(waiting_list) }}
+            </div>
+        </div>
+    </div>
+{% endblock %}

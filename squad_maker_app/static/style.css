@@ -1,0 +1,45 @@
+body {
+    font-family: 'Open Sans', sans-serif;
+}
+
+h1 {
+    color: navy;
+    font-size: 6em;
+    font-family: 'Graduate', cursive;
+    text-align: center;
+}
+
+.squad {
+    max-width: 500px;
+    float: left;
+    margin: 10px;
+}
+
+.panel-heading {
+    font-family: 'Graduate', cursive;
+    color: navy !important;
+    font-size: 2em;
+}
+
+ul.nav-tabs {
+    font-size: 2em;
+    font-weight: bolder;
+    margin-bottom: 10px;
+}
+
+.summary {
+    font-size: 1.5em;
+    font-style: italic;
+}
+
+form {
+    font-size: 1.25em;
+    margin-top: 15px;
+    margin-bottom: 15px;
+    padding: 10px;
+}
+
+
+.average {
+    font-weight: bolder;
+}

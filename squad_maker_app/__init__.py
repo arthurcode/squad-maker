@@ -2,7 +2,9 @@
 
 """ Squad Maker web app written with Flask framework. """
 
+import logging
 import os
+from logging.handlers import RotatingFileHandler
 from flask import Flask, request, render_template, redirect, url_for, flash
 
 from squad_maker_app.algorithms import make_squads_minimize_cumulative_delta_mean
@@ -10,10 +12,18 @@ from squad_maker_app.algorithms import make_squads_minimize_cumulative_delta_mea
 SETTINGS_ENV_VAR = 'SQUAD_MAKER_SETTINGS'
 PLAYER_SOURCE_CONFIG = 'PLAYER_SOURCE'
 NUM_SQUADS_REQUEST_ARG = 'numSquads'
+LOG_FILE = 'instance.log'
+MAX_LOG_FILE_BYTES = 10000
+MAX_LOG_FILE_BACKUPS = 1
 
 
 def create_app():
     app = Flask(__name__)
+
+    # configure logging
+    log_handler = RotatingFileHandler(LOG_FILE, maxBytes=MAX_LOG_FILE_BYTES, backupCount=MAX_LOG_FILE_BACKUPS)
+    log_handler.setLevel(logging.DEBUG if app.debug else logging.INFO)
+    app.logger.addHandler(log_handler)
 
     # load default settings, and override with values from a custom config file, if present.
     app.config.from_object('squad_maker_app.default_settings')
@@ -39,6 +49,7 @@ def create_app():
             num_squads = get_num_squads_from_request(request)
             players = get_all_players()
             (squads, waiting_list) = make_squads_minimize_cumulative_delta_mean(num_squads, players)
+            app.logger.info("Built %d squads with %d players on the waiting list" % (len(squads), len(waiting_list)))
             for squad in squads:
                 squad.players.sort(key=total_rating, reverse=True)
             waiting_list.sort(key=total_rating, reverse=True)
@@ -47,6 +58,7 @@ def create_app():
             # A ValueError indicates a problem with one or more of the input arguments. We
             # want to show these types of errors to the user. All other errors/exceptions should
             # trigger a 5XX error
+            app.logger.info("Got a ValueError while building squads: %s" % str(e))
             flash(str(e), 'error')
             return redirect(url_for('home'))
 
@@ -57,7 +69,9 @@ def create_app():
     def get_all_players():
         if PLAYER_SOURCE_CONFIG not in app.config:
             raise Exception("Missing required '%s' configuration variable" % PLAYER_SOURCE_CONFIG)
-        return app.config[PLAYER_SOURCE_CONFIG]()
+        players = app.config[PLAYER_SOURCE_CONFIG]()
+        app.logger.info("Sourced data for %d players" % (len(players) if players else None))
+        return players
 
     def total_rating(player):
         """ Sort players by cumulative skill rating """

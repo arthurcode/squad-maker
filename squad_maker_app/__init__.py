@@ -50,6 +50,10 @@ def create_app():
             flash(str(e), 'error')
             return redirect(url_for('home'))
 
+    @app.errorhandler(404)
+    def handle_page_not_found(e):
+        return render_template('not_found.html')
+
     def get_all_players():
         if PLAYER_SOURCE_CONFIG not in app.config:
             raise Exception("Missing required '%s' configuration variable" % PLAYER_SOURCE_CONFIG)

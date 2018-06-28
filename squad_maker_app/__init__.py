@@ -28,7 +28,9 @@ def create_app():
     @app.route('/')
     def home():
         # initially all players are on the waiting list
-        return render_template('home.html', waiting_list=get_all_players(),
+        waiting_list = get_all_players()
+        waiting_list.sort(key=total_rating, reverse=True)
+        return render_template('home.html', waiting_list=waiting_list,
                                num_squads_input_name=NUM_SQUADS_REQUEST_ARG)
 
     @app.route('/squad-maker')
@@ -37,6 +39,9 @@ def create_app():
             num_squads = get_num_squads_from_request(request)
             players = get_all_players()
             (squads, waiting_list) = make_squads_minimize_cumulative_delta_mean(num_squads, players)
+            for squad in squads:
+                squad.players.sort(key=total_rating, reverse=True)
+            waiting_list.sort(key=total_rating, reverse=True)
             return render_template('squads.html', squads=squads, waiting_list=waiting_list)
         except ValueError as e:
             # A ValueError indicates a problem with one or more of the input arguments. We
@@ -49,6 +54,10 @@ def create_app():
         if PLAYER_SOURCE_CONFIG not in app.config:
             raise Exception("Missing required '%s' configuration variable" % PLAYER_SOURCE_CONFIG)
         return app.config[PLAYER_SOURCE_CONFIG]()
+
+    def total_rating(player):
+        """ Sort players by cumulative skill rating """
+        return player.skating + player.shooting + player.checking
 
     return app
 
